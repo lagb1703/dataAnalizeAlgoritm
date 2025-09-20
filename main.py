@@ -2,11 +2,64 @@ import pandas as pd
 # import numpy as np
 import matplotlib.pyplot as plt
 from os import path
+from typing import List
 
 hilosFold = "hilos"
 linealFold = "lineal"
 procesosFold = "procesos"
 dirName = path.dirname(__file__)
+
+def plotVsDataframes(datas1: List[pd.DataFrame], datas2: List[pd.DataFrame], name: List[str]):
+    i = 0
+    while i < len(datas1):
+        meanData1 = datas1[i].mean()
+        meanData2 = datas2[i].mean()
+        plt.plot(meanData1, label=name[1]) # type: ignore
+        plt.plot(meanData2, label=name[2]) # type: ignore
+        plt.title(f"{name[0]} {(i+1)*4}") # type: ignore
+        plt.xlabel("n") # type: ignore
+        plt.ylabel("t promedio") # type: ignore
+        plt.legend() # type: ignore
+        plt.grid(True) # type: ignore
+        plt.show() # type: ignore
+        i += 1
+
+def plotAll(datas1: List[pd.DataFrame], data2: pd.DataFrame, name: List[str]):
+    meanData2 = data2.mean()
+    plt.plot(meanData2, label="secuencial") # type: ignore
+    i = 0
+    while i < len(datas1):
+        meanData1 = datas1[i].mean()
+        plt.plot(meanData1, label=f"{name[1]} {(i+1)*4}") # type: ignore
+        i += 1
+    plt.title(f"{name[0]}") # type: ignore
+    plt.xlabel("n") # type: ignore
+    plt.ylabel("t promedio") # type: ignore
+    plt.legend() # type: ignore
+    plt.grid(True) # type: ignore
+    plt.show() # type: ignore
+    i = 0
+    while i < len(datas1):
+        meanData1 = datas1[i].mean()
+        series = pd.Series({
+            "1000": meanData2["1000"] / meanData1["1000"],
+            "1500": meanData2["1500"] / meanData1["1500"],
+            "2000": meanData2["2000"] / meanData1["2000"],
+            "2500": meanData2["2500"] / meanData1["2500"],
+            "3000": meanData2["3000"] / meanData1["3000"],
+            "3500": meanData2["3500"] / meanData1["3500"],
+            "4000": meanData2["4000"] / meanData1["4000"],
+        })
+        print(series)
+        plt.plot(series, label=f"{(i+1)*4}") # type: ignore
+        i += 1
+    plt.title(f"{name[0]}") # type: ignore
+    plt.xlabel("n") # type: ignore
+    plt.ylabel("speedup") # type: ignore
+    plt.legend() # type: ignore
+    plt.grid(True) # type: ignore
+    plt.show() # type: ignore
+    
 
 tradicionalSecuencial:pd.DataFrame = pd.read_csv(path.join(dirName, linealFold, "tradicional.csv")) # type: ignore
 libroSecuencial:pd.DataFrame = pd.read_csv(path.join(dirName, linealFold, "libro.csv")) # type: ignore
@@ -36,7 +89,6 @@ for index, i in enumerate(tradicionalHilos['0']):
     match i:
         case 4:
             data = dataframesHilos[0]
-            tradicionalHilos
             data.loc[len(data)] =(
                 [
                     tradicionalHilos["1000"][index], 
@@ -167,7 +219,6 @@ for index, i in enumerate(tradicionalProcesos['0']):
     data: pd.DataFrame | None = None
     match i:
         case 4:
-            print("4")
             data = dataframes[0]
             data.loc[len(data)] =(
                 [
@@ -181,7 +232,6 @@ for index, i in enumerate(tradicionalProcesos['0']):
                 ]
             )
         case 8:
-            print("8")
             data = dataframes[1]
             data.loc[len(data)] =(
                 [
@@ -195,7 +245,6 @@ for index, i in enumerate(tradicionalProcesos['0']):
                 ]
             )
         case 12:
-            print("12")
             data = dataframes[2]
             data.loc[len(data)] =(
                 [
@@ -209,7 +258,6 @@ for index, i in enumerate(tradicionalProcesos['0']):
                 ]
             )
         case 16:
-            print("16")
             data = dataframes[3]
             data.loc[len(data)] =(
                 [
@@ -279,31 +327,15 @@ for index, i in enumerate(libroProcesos['0']):
                 ]
             )
         case _:pass
-i = 0
-# while i < len(dataframes):
-#     meanTradicional = dataframes[i].mean()
-#     meanTradicionalHilos = dataframesHilos[i].mean()
-#     plt.plot(meanTradicional, label="procesos") # type: ignore
-#     plt.plot(meanLibro, label="hilos") # type: ignore
-#     plt.plot(tradicionalSecuencial.mean(), label="secuencial") # type: ignore
-#     plt.title(f"tradicional procesos {(i+1)*4} vs hilos {(i+1)*4} vs secuencial") # type: ignore
-#     plt.xlabel("n") # type: ignore
-#     plt.ylabel("t promedio") # type: ignore
-#     plt.legend() # type: ignore
-#     plt.grid(True) # type: ignore
-#     plt.show() # type: ignore
-#     i+=1
-    
-while i < len(dataframes):
-    meanTradicional = dataframesLibro[i].mean()
-    meanTradicionalHilos = dataframesLibroHilos[i].mean()
-    plt.plot(meanTradicional, label="procesos") # type: ignore
-    plt.plot(meanLibro, label="hilos") # type: ignore
-    plt.plot(tradicionalSecuencial.mean(), label="secuencial") # type: ignore
-    plt.title(f"subdivisión procesos {(i+1)*4} vs hilos {(i+1)*4} vs secuencial") # type: ignore
-    plt.xlabel("n") # type: ignore
-    plt.ylabel("t promedio") # type: ignore
-    plt.legend() # type: ignore
-    plt.grid(True) # type: ignore
-    plt.show() # type: ignore
-    i+=1
+plt.plot(meanLibro, label="subdivisión") # type: ignore
+plt.plot(meanTradicional, label="tradicional") # type: ignore
+plt.title(f"secuencial") # type: ignore
+plt.xlabel("n") # type: ignore
+plt.ylabel("t promedio") # type: ignore
+plt.legend() # type: ignore
+plt.grid(True) # type: ignore
+plt.show() # type: ignore
+plotAll(dataframes, tradicionalSecuencial, ["Proceso", "Proceso "])
+plotAll(dataframesHilos, tradicionalSecuencial, ["Hilo", "Hilo "])
+plotVsDataframes(dataframes, dataframesLibro, ["Tradicional vs Subdivisión hilos:", "tradicional", "subdivisión"])
+plotVsDataframes(dataframesHilos, dataframesLibroHilos, ["Tradicional vs Subdivisión hilos:", "tradicional", "subdivisión"])
